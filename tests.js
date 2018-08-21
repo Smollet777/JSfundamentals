@@ -18,18 +18,67 @@
 })();
 
 window.onload = () => {
-  test('A test.', () => {
-    assert(true, 'First assertion completed');
-    assert(true, 'Second assertion completed');
-    assert(true, 'Third assertion completed');
+  test('Callback test', () => {
+    let text = 'Domo arigato!'
+    assert(useless(text, function () {
+      return text;
+    }) === text, "The useless function works!" + text);
+    assert(true, "somedescriptivetext");
   });
-  test('Another test.', () => {
-    assert(true, 'Firts test completed');
-    assert(false, 'Second test failed');
-    assert(true, 'Third test completed');
-  });
-  test('A third test.', () => {
-    assert(null, 'fail');
-    assert(5, 'pass');
+  test('Scope test.', () => {
+    assert(true, "  - - - - - BEFORE OUTER - - - - -  ");
+    assert(typeof outer === 'function', "outer() is in scope");
+    assert(typeof inner !== 'function', "inner() is NOT in scope");
+    assert(typeof a !== 'number', "а is NOT in scope");
+    assert(typeof b !== 'number', "b is NOT in scope");
+    assert(typeof c !== 'number', "с is NOT in scope");
+
+    function outer() {
+      assert(true, "  - - - - - INSIDE OUTER,BEFORE A - - - - -  ");
+      assert(typeof outer === 'function', "outer() is in scope");
+      assert(typeof inner === 'function', "inner() is in scope");
+      assert(typeof a !== 'number', "а is NOT in scope");
+      assert(typeof b !== 'number', "b is NOT in scope");
+      assert(typeof c !== 'number', "с is NOT in scope");
+      var a = 1;
+      assert(true, "  - - - - - INSIDE OUTER,AFTER A - - - - -  ");
+      assert(typeof outer === 'function', "outer() is in scope");
+      assert(typeof inner === 'function', "inner() is in scope");
+      assert(typeof a === 'number', "а is in scope");
+      assert(typeof b !== 'number', "b is NOT in scope");
+      assert(typeof c !== 'number', "с is NOT in scope");
+
+      function inner() {}
+      var b = 2;
+      assert(true, "  - - - - - INSIDE OUTER,AFTER INNER AND B - - - - -  ");
+      assert(typeof outer === 'function', "outer() is in scope");
+      assert(typeof inner === 'function', "inner() is in scope");
+      assert(typeof a === 'number', "а is in scope");
+      assert(typeof b === 'number', "b is in scope");
+      assert(typeof c !== 'number', "с is NOT in scope");
+      if (a == 1) {
+        assert(true, "  - - - - - INSIDE OUTER,INSIDE IF,BEFORE C - - - - -  ");
+        assert(typeof outer === 'function', "outer() is in scope");
+        assert(typeof inner === 'function', "inner() is in scope");
+        assert(typeof a === 'number', "а is in scope");
+        assert(typeof b === 'number', "b is in scope");
+        assert(typeof c !== 'number', "с is NOT in scope");
+        var c = 3;
+      }
+      assert(true, "  - - - - - INSIDE OUTER,AFTER IF - - - - -  ");
+      assert(typeof outer === 'function', "outer() is in scope");
+      assert(typeof inner === 'function', "inner() is in scope");
+      assert(typeof a === 'number', "а is in scope");
+      assert(typeof b === 'number', "b is in scope");
+      assert(typeof c === 'number', "с is in scope");
+    }
+    outer();
+    assert(true, "  - - - - - AFTER OUTER - - - - -  ");
+    assert(typeof outer === 'function', "outer() is in scope");
+    assert(typeof inner !== 'function', "inner() is NOT in scope");
+    assert(typeof a !== 'number', "а is NOT in scope");
+    assert(typeof b !== 'number', "b is NOT in scope");
+    assert(typeof c !== 'number', "с is NOT in scope");
   });
 }
+let useless = (text, callback) => callback();
