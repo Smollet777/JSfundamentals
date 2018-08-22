@@ -18,6 +18,7 @@
 })();
 
 window.onload = () => {
+  /*
   test('Callback test', () => {
     let text = 'Domo arigato!'
     assert(useless(text, function () {
@@ -81,4 +82,23 @@ window.onload = () => {
     assert(typeof c !== 'number', "с is NOT in scope");
   });
 }
-let useless = (text, callback) => callback();
+let useless = (text, callback) => callback();*/
+  const juggler1 = {}
+  const juggler2 = {}
+
+  function juggle() {
+    let result = 0
+    for (let i = 0; i < arguments.length; i++) {
+      result += arguments[i]
+    }
+    this.result = result
+  }
+
+  juggle.call(juggler1, 1, 2, 3, 4, 5)
+  juggle.apply(juggler2, [1, 2, 3, 4, 5])
+
+  test('Call and apply test', () => {
+    assert(juggler1.result === 15, 'juggled via call');
+    assert(juggler2.result === 15, 'juggled via apply');
+  })
+}
