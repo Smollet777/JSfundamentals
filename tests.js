@@ -19,18 +19,84 @@
 
 window.onload = () => {
 
-  function forEach(list, callback) {
-    for (let i = 0; i < list.length; i++) {
-      callback.call(list[i], i)
-    }
-  }
+  test('запоминание однозначных ф-ий в коллекции', () => {
+    const store = {
+      nextId: 1,
+      cache: {},
 
-  test('Custom for-each test', () => {
-    const weapons = ['shuriken', 'katana', 'nunchucks']
-    forEach(weapons, function (i) {
-      assert(this == weapons[i], `Got the expected value of ${weapons[i]}`)
-    })
+      add: function (fn) {
+        if (!fn.id) {
+          fn.id = store.nextId++
+          return true
+        }
+      }
+    }
+
+    function ninja() {}
+    assert(store.add(ninja), 'Function was safely added.')
+    assert(!store.add(ninja), 'But it was only once.')
   })
+
+  test('запоминание вычесленных ранее знечений', () => {
+
+    function isPrime(value) {
+      if (!isPrime.answers) isPrime.answers = {}
+
+      if (isPrime.answers[value] != null) {
+        return isPrime.answers[value]
+      }
+
+      let prime = value !== 1
+      for (let i = 2; i < value; i++) {
+        if (value % i == 0) {
+          prime = false
+          break
+        }
+      }
+
+      return isPrime.answers[value] = prime
+    }
+
+    assert(!isPrime.answers, 'There is no values in cache yet')
+    assert(isPrime(5), '5 is prime')
+    assert(isPrime.answers[5], 'The answer was cached')
+  })
+
+  test('имитация методов обработки массивов', () => {
+
+    const elems = {
+      length: 0,
+
+      add: function (elem) {
+        Array.prototype.push.call(this, elem)
+      },
+
+      gather: function (id) {
+        this.add(document.getElementById(id))
+      }
+    }
+
+    elems.gather('first')
+    assert(elems.length === 1 && elems[0].nodeType, 'Verify that we have an element in our stash')
+
+    elems.gather('second')
+    assert(elems.length === 2 && elems[1].nodeType, 'Verify the other insertion')
+
+
+  })
+  /*
+    function forEach(list, callback) {
+      for (let i = 0; i < list.length; i++) {
+        callback.call(list[i], i)
+      }
+    }
+
+    test('Custom for-each test', () => {
+      const weapons = ['shuriken', 'katana', 'nunchucks']
+      forEach(weapons, function (i) {
+        assert(this == weapons[i], `Got the expected value of ${weapons[i]}`)
+      })
+    })*/
   /*
   test('Callback test', () => {
     let text = 'Domo arigato!'
