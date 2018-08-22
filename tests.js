@@ -18,6 +18,19 @@
 })();
 
 window.onload = () => {
+
+  function forEach(list, callback) {
+    for (let i = 0; i < list.length; i++) {
+      callback.call(list[i], i)
+    }
+  }
+
+  test('Custom for-each test', () => {
+    const weapons = ['shuriken', 'katana', 'nunchucks']
+    forEach(weapons, function (i) {
+      assert(this == weapons[i], `Got the expected value of ${weapons[i]}`)
+    })
+  })
   /*
   test('Callback test', () => {
     let text = 'Domo arigato!'
@@ -83,7 +96,7 @@ window.onload = () => {
   });
 }
 let useless = (text, callback) => callback();*/
-  const juggler1 = {}
+  /*const juggler1 = {}
   const juggler2 = {}
 
   function juggle() {
@@ -100,5 +113,5 @@ let useless = (text, callback) => callback();*/
   test('Call and apply test', () => {
     assert(juggler1.result === 15, 'juggled via call');
     assert(juggler2.result === 15, 'juggled via apply');
-  })
+  })*/
 }
