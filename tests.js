@@ -19,71 +19,115 @@
 
 window.onload = () => {
 
-  test('запоминание однозначных ф-ий в коллекции', () => {
-    const store = {
-      nextId: 1,
-      cache: {},
+  test('Разбиение списка аргументов', () => {
 
-      add: function (fn) {
-        if (!fn.id) {
-          fn.id = store.nextId++
-          return true
+    function multiMax(multi) {
+      return multi * Math.max.apply(Math,
+        Array.prototype.slice.call(arguments, 1))
+    }
+
+    assert(multiMax(3, 1, 2, 4) === 12, 'multiMax(3,1,2,4) (first arg, by largest) 3*4=12')
+  })
+  test('Обход списка аргументов переменной длины', () => {
+
+    function merge(root) {
+      for (let i = 1; i < arguments.length; i++) {
+        for (let key in arguments[i]) {
+          root[key] = arguments[i][key];
         }
       }
+      return root;
     }
+    let name = {
+      name: 'John'
+    };
+    let surname = {
+      surname: 'Doe'
+    };
+    let merged = merge(name, surname) // name obj->{name: "John", surname: "Doe"}
 
-    function ninja() {}
-    assert(store.add(ninja), 'Function was safely added.')
-    assert(!store.add(ninja), 'But it was only once.')
+    assert(merged.name === 'John', 'Merged object has name "John"')
+    assert(merged.surname === 'Doe', 'Merged object has surname "Doe"')
   })
 
-  test('запоминание вычесленных ранее знечений', () => {
+  test('Обобщённые функции min() и max()', () => {
+    function smallest(arr) {
+      return Math.min.apply(Math, arr)
+    }
 
-    function isPrime(value) {
-      if (!isPrime.answers) isPrime.answers = {}
+    function largest(arr) {
+      return Math.max.apply(Math, arr)
+    }
+    assert(smallest([0, 1, 2, 3]) === 0, 'Located the smallest value')
+    assert(largest([0, 1, 2, 3]) === 3, 'Located the largest value')
+  })
+  /*
+      test('запоминание однозначных ф-ий в коллекции', () => {
+        const store = {
+          nextId: 1,
+          cache: {},
 
-      if (isPrime.answers[value] != null) {
-        return isPrime.answers[value]
-      }
-
-      let prime = value !== 1
-      for (let i = 2; i < value; i++) {
-        if (value % i == 0) {
-          prime = false
-          break
+          add: function (fn) {
+            if (!fn.id) {
+              fn.id = store.nextId++
+              return true
+            }
+          }
         }
-      }
 
-      return isPrime.answers[value] = prime
-    }
+        function ninja() {}
+        assert(store.add(ninja), 'Function was safely added.')
+        assert(!store.add(ninja), 'But it was only once.')
+      })
 
-    assert(!isPrime.answers, 'There is no values in cache yet')
-    assert(isPrime(5), '5 is prime')
-    assert(isPrime.answers[5], 'The answer was cached')
-  })
+      test('запоминание вычесленных ранее знечений', () => {
 
-  test('имитация методов обработки массивов', () => {
+        function isPrime(value) {
+          if (!isPrime.answers) isPrime.answers = {}
 
-    const elems = {
-      length: 0,
+          if (isPrime.answers[value] != null) {
+            return isPrime.answers[value]
+          }
 
-      add: function (elem) {
-        Array.prototype.push.call(this, elem)
-      },
+          let prime = value !== 1
+          for (let i = 2; i < value; i++) {
+            if (value % i == 0) {
+              prime = false
+              break
+            }
+          }
 
-      gather: function (id) {
-        this.add(document.getElementById(id))
-      }
-    }
+          return isPrime.answers[value] = prime
+        }
 
-    elems.gather('first')
-    assert(elems.length === 1 && elems[0].nodeType, 'Verify that we have an element in our stash')
+        assert(!isPrime.answers, 'There is no values in cache yet')
+        assert(isPrime(5), '5 is prime')
+        assert(isPrime.answers[5], 'The answer was cached')
+      })
 
-    elems.gather('second')
-    assert(elems.length === 2 && elems[1].nodeType, 'Verify the other insertion')
+      test('имитация методов обработки массивов', () => {
+
+        const elems = {
+          length: 0,
+
+          add: function (elem) {
+            Array.prototype.push.call(this, elem)
+          },
+
+          gather: function (id) {
+            this.add(document.getElementById(id))
+          }
+        }
+
+        elems.gather('first')
+        assert(elems.length === 1 && elems[0].nodeType, 'Verify that we have an element in our stash')
+
+        elems.gather('second')
+        assert(elems.length === 2 && elems[1].nodeType, 'Verify the other insertion')
 
 
-  })
+      })
+      */
   /*
     function forEach(list, callback) {
       for (let i = 0; i < list.length; i++) {
