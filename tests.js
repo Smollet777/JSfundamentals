@@ -19,48 +19,97 @@
 
 window.onload = () => {
 
-  test('Разбиение списка аргументов', () => {
+  test('Перегрузка функций по числу аргументов', () => {
 
-    function multiMax(multi) {
-      return multi * Math.max.apply(Math,
-        Array.prototype.slice.call(arguments, 1))
-    }
+    function addMethod(obj, name, fn) {
+      // сохранить предыдущую ф-ию, так как её придётся вызвать,
+      let old = obj[name]; // если число параметров и аргументов в переданной ф-ии не совпадает 
 
-    assert(multiMax(3, 1, 2, 4) === 12, 'multiMax(3,1,2,4) (first arg, by largest) 3*4=12')
-  })
-  test('Обход списка аргументов переменной длины', () => {
-
-    function merge(root) {
-      for (let i = 1; i < arguments.length; i++) {
-        for (let key in arguments[i]) {
-          root[key] = arguments[i][key];
+      obj[name] = function () { // создать новую анонимную ф-ию, которая становится методом
+        if (fn.length === arguments.length) {
+          return fn.apply(this, arguments); // вызвать переданную ф-ию, если число её параметров и аргументов совпадает
+        } else if (typeof old === 'function') {
+          return old.apply(this, arguments); // вызвать предыдущую, если число параметров и аргументов не совпадает
         }
       }
-      return root;
     }
-    let name = {
-      name: 'John'
+
+    const ninjas = {
+      values: ['Dean Edwards', 'Sam Stephenson', 'Alex Russel']
     };
-    let surname = {
-      surname: 'Doe'
-    };
-    let merged = merge(name, surname) // name obj->{name: "John", surname: "Doe"}
 
-    assert(merged.name === 'John', 'Merged object has name "John"')
-    assert(merged.surname === 'Doe', 'Merged object has surname "Doe"')
+    addMethod(ninjas, 'find', function () {
+      return this.values
+    });
+    addMethod(ninjas, 'find', function (name) {
+      let ret = [];
+      for (let i = 0; i < this.values.length; i++)
+        if (this.values[i].indexOf(name) === 0)
+          ret.push(this.values[i]);
+      return ret;
+    });
+    addMethod(ninjas, 'find', function (name, surname) {
+      let ret = [];
+      for (let i = 0; i < this.values.length; i++)
+        if (this.values[i] === (`${name} ${surname}`))
+          ret.push(this.values[i]);
+      return ret;
+    });
+
+    assert(ninjas.find().length === 3,
+      "Found all ninjas");
+    assert(ninjas.find("Sam").length === 1,
+      "Found ninja bу first name");
+    assert(ninjas.find("Dean", "Edwards").length === 1,
+      "Found ninja bу first and lastname");
+    assert(ninjas.find("Alex", "Russell", "Jr") == null,
+      "Found nothing");
+
   })
+  /*
+    test('Разбиение списка аргументов', () => {
 
-  test('Обобщённые функции min() и max()', () => {
-    function smallest(arr) {
-      return Math.min.apply(Math, arr)
-    }
+      function multiMax(multi) {
+        return multi * Math.max.apply(Math,
+          Array.prototype.slice.call(arguments, 1))
+      }
 
-    function largest(arr) {
-      return Math.max.apply(Math, arr)
-    }
-    assert(smallest([0, 1, 2, 3]) === 0, 'Located the smallest value')
-    assert(largest([0, 1, 2, 3]) === 3, 'Located the largest value')
-  })
+      assert(multiMax(3, 1, 2, 4) === 12, 'multiMax(3,1,2,4) (first arg, by largest) 3*4=12')
+    })
+    test('Обход списка аргументов переменной длины', () => {
+
+      function merge(root) {
+        for (let i = 1; i < arguments.length; i++) {
+          for (let key in arguments[i]) {
+            root[key] = arguments[i][key];
+          }
+        }
+        return root;
+      }
+      let name = {
+        name: 'John'
+      };
+      let surname = {
+        surname: 'Doe'
+      };
+      let merged = merge(name, surname) // name obj->{name: "John", surname: "Doe"}
+
+      assert(merged.name === 'John', 'Merged object has name "John"')
+      assert(merged.surname === 'Doe', 'Merged object has surname "Doe"')
+    })
+
+    test('Обобщённые функции min() и max()', () => {
+      function smallest(arr) {
+        return Math.min.apply(Math, arr)
+      }
+
+      function largest(arr) {
+        return Math.max.apply(Math, arr)
+      }
+      assert(smallest([0, 1, 2, 3]) === 0, 'Located the smallest value')
+      assert(largest([0, 1, 2, 3]) === 3, 'Located the largest value')
+    })
+    */
   /*
       test('запоминание однозначных ф-ий в коллекции', () => {
         const store = {
