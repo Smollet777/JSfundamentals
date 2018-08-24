@@ -19,6 +19,63 @@
 
 window.onload = () => {
 
+  test('Кеширование с помошью функций', function () {
+
+  Function.prototype.memoized=function(key){
+    this._values=this._values||{}// проверить, существует ли свойство,
+    // а иначе создать его объект, чтобы сохранить кешированные значения
+  
+    return this._values[key] !== undefined ? // проверить при вызове с ключом, имеется ли для него в кеше значение
+      this._values[key] : // возвратить значение
+      this._values[key] = this.apply(this,arguments) // сохранить значение для последующих вызовов
+  }
+
+  function isPrime(num) {
+    let prime = num != 1;
+    for (let i = 2, s = Math.sqrt(num); i <= s; i++) {
+      if (num % i == 0) {
+        prime = false;
+        break;
+      }
+    }
+    return prime;
+  }
+
+    assert(isPrime._values===undefined, 'There is no values yet.');
+    assert(isPrime(5), 'Func works; 5 is prime.');
+    assert(isPrime.memoized(5), 'func.memoized works; 5 is prime.');
+    assert(isPrime._values[5], 'The answer has been cached.');
+
+  });
+
+  test('Кеширование с помощью замыканий',()=>{
+    // дублируем ф-ию выше
+    Function.prototype.memoized = function (key) {
+      this._values = this._values || {}; 
+      return this._values[key] !== undefined ?
+        this._values[key] :
+        this._values[key] = this.apply(this, this.arguments); 
+    };
+    
+    Function.prototype.memoize = function () {
+      return  ()=>  // заключить исходную ф-ию в обёртку ф-ии запоминания
+         this.memoized.apply(this, arguments);
+    };
+    
+    let isPrime = (function isPrime(num) {
+      let prime = num != 1;
+      for (let i = 2, s = Math.sqrt(num); i <= s; i++) {
+        if (num % i == 0) {
+          prime = false;
+          break;
+        }
+      }
+      return prime;
+    }).memoize();
+
+    assert(isPrime(5), 'func.memoized is automate. No need of "func.memoized(x)".');
+  })
+/*
   Function.prototype.partial = function () {
     let fn = this,
       args = Array.prototype.slice.call(arguments);
@@ -30,9 +87,9 @@ window.onload = () => {
       return fn.apply(this, args);
     };
   }
-
-  String.prototype.csv = String.prototype.split.partial(/,\s*/)
-
+*/
+  //String.prototype.csv = String.prototype.split.partial(/,\s*/)
+/*
   test('curry', () => {
 
     let results = ('Mugan, Jin, Fuu').csv()
@@ -61,7 +118,7 @@ window.onload = () => {
       assert(true, 'Click event bound via curried function.')
     );
 
-  })
+  })*/
   /*
     test('Перегрузка функций по числу аргументов', () => {
 
