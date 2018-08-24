@@ -19,6 +19,59 @@
 
 window.onload = () => {
 
+  test('click on body or div', () => {})
+  /*
+    test('Временная область действия и частные переменные', () => {
+      // простой counter. numClicks сохраняется для eventListener'а в замыкании
+      document.addEventListener('click', (() => {
+        let numClicks = 0;
+        return () => alert(++numClicks)
+      })(), false);
+    })*/
+
+  test('Соблюдение имен в области действия через параметры', function () {});
+
+  document.addEventListener('click', ((start, end) => { // назначение аргументов в IIFE
+      let numClicks = 0;
+      return () => alert(`${start}${++numClicks}${end}`)
+    })('You cliked ', ' times'), // передача аргументов и IIFE
+    false);
+
+
+  // в замыканиях сохраняют­ся только ССЫЛКИ на включаемые в них переменные, а не их конкретные значения в тот момент, когда они создаются
+  // используем IIFE 
+  let divs = document.getElementsByTagName('div');
+  for (var i = 0; i < divs.length; i++)(function (n) {
+
+    // передаём порядковый номер функции немедленного вызова, тем самым, включаем его в замыкание внутренней функции. 
+    divs[n].addEventListener('click', function () {
+      alert(`div ${n+1} was clicked.`);
+    }, false);
+  })(i); // В пределах области действия на каждом шаге цикла переменная i определяется заново
+
+  /* 
+  // пример сокращения кода 
+  // без ввода переменной с именем покороче(из библиотеки Prototype)
+
+  // ! не let v = Element._attributeTranslations.read.values
+  (
+    function (v) {
+      Object.extend(v, {
+        href: v._getAttr,
+        src: v._getAttr,
+        type: v._getAttr,
+        action: v._getAttrNode,
+        disabled: v._flag,
+        checked: v._flag,
+        readonly: v._flag,
+        multiple: v._flag
+        //...
+      });
+    }
+  )(Element._attributeTranslations.read.values); 
+  */
+
+  /*
   test('Кеширование с помошью функций', function () {
 
   Function.prototype.memoized=function(key){
@@ -74,51 +127,51 @@ window.onload = () => {
     }).memoize();
 
     assert(isPrime(5), 'func.memoized is automate. No need of "func.memoized(x)".');
-  })
-/*
-  Function.prototype.partial = function () {
-    let fn = this,
-      args = Array.prototype.slice.call(arguments);
-    return function () {
-      let arg = 0;
-      for (let i = 0; i < args.length && arg < arguments.length; i++)
-        if (args[i] === undefined)
-          args[i] = arguments[arg++];
-      return fn.apply(this, args);
-    };
-  }
-*/
-  //String.prototype.csv = String.prototype.split.partial(/,\s*/)
-/*
-  test('curry', () => {
-
-    let results = ('Mugan, Jin, Fuu').csv()
-
-    assert(
-      results[0] == 'Mugan' &&
-      results[1] == 'Jin' &&
-      results[2] == 'Fuu',
-      'Names were split properly');
-  })
-
-  test('curry with skipped args', () => {
-
-    assert(true, '// А call to this function will bе delayed 1s.');
-    let delay = setTimeout.partial(undefined, 1000);
-    delay(() => {
-      assert(true, 'delayed!');
-    });
-
-    assert(true, ' Not delayed!');
-
-
-    assert(true, '// click on body to trigger a function')
-    let bindClick = document.body.addEventListener.partial('click', undefined, false);
-    bindClick(() =>
-      assert(true, 'Click event bound via curried function.')
-    );
-
   })*/
+  /*
+    Function.prototype.partial = function () {
+      let fn = this,
+        args = Array.prototype.slice.call(arguments);
+      return function () {
+        let arg = 0;
+        for (let i = 0; i < args.length && arg < arguments.length; i++)
+          if (args[i] === undefined)
+            args[i] = arguments[arg++];
+        return fn.apply(this, args);
+      };
+    }
+  */
+  //String.prototype.csv = String.prototype.split.partial(/,\s*/)
+  /*
+    test('curry', () => {
+
+      let results = ('Mugan, Jin, Fuu').csv()
+
+      assert(
+        results[0] == 'Mugan' &&
+        results[1] == 'Jin' &&
+        results[2] == 'Fuu',
+        'Names were split properly');
+    })
+
+    test('curry with skipped args', () => {
+
+      assert(true, '// А call to this function will bе delayed 1s.');
+      let delay = setTimeout.partial(undefined, 1000);
+      delay(() => {
+        assert(true, 'delayed!');
+      });
+
+      assert(true, ' Not delayed!');
+
+
+      assert(true, '// click on body to trigger a function')
+      let bindClick = document.body.addEventListener.partial('click', undefined, false);
+      bindClick(() =>
+        assert(true, 'Click event bound via curried function.')
+      );
+
+    })*/
   /*
     test('Перегрузка функций по числу аргументов', () => {
 
