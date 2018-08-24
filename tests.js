@@ -19,53 +19,97 @@
 
 window.onload = () => {
 
-  test('Перегрузка функций по числу аргументов', () => {
-
-    function addMethod(obj, name, fn) {
-      // сохранить предыдущую ф-ию, так как её придётся вызвать,
-      let old = obj[name]; // если число параметров и аргументов в переданной ф-ии не совпадает 
-
-      obj[name] = function () { // создать новую анонимную ф-ию, которая становится методом
-        if (fn.length === arguments.length) {
-          return fn.apply(this, arguments); // вызвать переданную ф-ию, если число её параметров и аргументов совпадает
-        } else if (typeof old === 'function') {
-          return old.apply(this, arguments); // вызвать предыдущую, если число параметров и аргументов не совпадает
-        }
-      }
-    }
-
-    const ninjas = {
-      values: ['Dean Edwards', 'Sam Stephenson', 'Alex Russel']
+  Function.prototype.partial = function () {
+    let fn = this,
+      args = Array.prototype.slice.call(arguments);
+    return function () {
+      let arg = 0;
+      for (let i = 0; i < args.length && arg < arguments.length; i++)
+        if (args[i] === undefined)
+          args[i] = arguments[arg++];
+      return fn.apply(this, args);
     };
+  }
 
-    addMethod(ninjas, 'find', function () {
-      return this.values
-    });
-    addMethod(ninjas, 'find', function (name) {
-      let ret = [];
-      for (let i = 0; i < this.values.length; i++)
-        if (this.values[i].indexOf(name) === 0)
-          ret.push(this.values[i]);
-      return ret;
-    });
-    addMethod(ninjas, 'find', function (name, surname) {
-      let ret = [];
-      for (let i = 0; i < this.values.length; i++)
-        if (this.values[i] === (`${name} ${surname}`))
-          ret.push(this.values[i]);
-      return ret;
+  String.prototype.csv = String.prototype.split.partial(/,\s*/)
+
+  test('curry', () => {
+
+    let results = ('Mugan, Jin, Fuu').csv()
+
+    assert(
+      results[0] == 'Mugan' &&
+      results[1] == 'Jin' &&
+      results[2] == 'Fuu',
+      'Names were split properly');
+  })
+
+  test('curry with skipped args', () => {
+
+    assert(true, '// А call to this function will bе delayed 1s.');
+    let delay = setTimeout.partial(undefined, 1000);
+    delay(() => {
+      assert(true, 'delayed!');
     });
 
-    assert(ninjas.find().length === 3,
-      "Found all ninjas");
-    assert(ninjas.find("Sam").length === 1,
-      "Found ninja bу first name");
-    assert(ninjas.find("Dean", "Edwards").length === 1,
-      "Found ninja bу first and lastname");
-    assert(ninjas.find("Alex", "Russell", "Jr") == null,
-      "Found nothing");
+    assert(true, ' Not delayed!');
+
+
+    assert(true, '// click on body to trigger a function')
+    let bindClick = document.body.addEventListener.partial('click', undefined, false);
+    bindClick(() =>
+      assert(true, 'Click event bound via curried function.')
+    );
 
   })
+  /*
+    test('Перегрузка функций по числу аргументов', () => {
+
+      function addMethod(obj, name, fn) {
+        // сохранить предыдущую ф-ию, так как её придётся вызвать,
+        let old = obj[name]; // если число параметров и аргументов в переданной ф-ии не совпадает 
+
+        obj[name] = function () { // создать новую анонимную ф-ию, которая становится методом
+          if (fn.length === arguments.length) {
+            return fn.apply(this, arguments); // вызвать переданную ф-ию, если число её параметров и аргументов совпадает
+          } else if (typeof old === 'function') {
+            return old.apply(this, arguments); // вызвать предыдущую, если число параметров и аргументов не совпадает
+          }
+        }
+      }
+
+      const ninjas = {
+        values: ['Dean Edwards', 'Sam Stephenson', 'Alex Russel']
+      };
+
+      addMethod(ninjas, 'find', function () {
+        return this.values
+      });
+      addMethod(ninjas, 'find', function (name) {
+        let ret = [];
+        for (let i = 0; i < this.values.length; i++)
+          if (this.values[i].indexOf(name) === 0)
+            ret.push(this.values[i]);
+        return ret;
+      });
+      addMethod(ninjas, 'find', function (name, surname) {
+        let ret = [];
+        for (let i = 0; i < this.values.length; i++)
+          if (this.values[i] === (`${name} ${surname}`))
+            ret.push(this.values[i]);
+        return ret;
+      });
+
+      assert(ninjas.find().length === 3,
+        "Found all ninjas");
+      assert(ninjas.find("Sam").length === 1,
+        "Found ninja bу first name");
+      assert(ninjas.find("Dean", "Edwards").length === 1,
+        "Found ninja bу first and lastname");
+      assert(ninjas.find("Alex", "Russell", "Jr") == null,
+        "Found nothing");
+
+    })*/
   /*
     test('Разбиение списка аргументов', () => {
 
