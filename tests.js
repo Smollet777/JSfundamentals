@@ -18,40 +18,106 @@
 })();
 
 window.onload = () => {
+  test('Препятствия при получении экземпляров объектов', () => {
+    // Результат исключения оператора new из вызова функции
+    function User(firstname, lastname) {
+      this.name = `${firstname} ${lastname}`
+    }
 
-  test('Наследования с помощью прототипов', () => {
-    function Person() {}
-    Person.prototype.dance = function () {}
+    const user1 = User('Ichigo', 'kurosaki')
+    assert(user1, 'user is NOT instantiated cuz we forget "new"')
 
-    function Ninja() {}
-    Ninja.prototype = new Person()
+    // Неожиданное внедрение переменной в глобальное пространство имен
+    function User(firstname, lastname) {
+      this.name = `${firstname} ${lastname}`
+    }
 
-    const ninja = new Ninja()
-    assert(ninja instanceof Ninja, 'ninja receives functionality from the Ninja prototype')
-    assert(ninja instanceof Person, '... and the Person prototype')
-    assert(ninja instanceof Object, '... and the Object prototype')
-    assert(typeof ninja.dance == 'function', '... and can dance')
-  })
+    const name = 'Rukia'
+    assert(name === 'Rukia', 'Name was set to Rukia')
 
-  test('Прототипы НТМL-разметки элементов модели DOM', () => {
-    setTimeout(() => {
-      const a = document.getElementById('a')
-      a.parentNode.removeChild(a) // удалить старым методом
-      assert(!document.getElementById('a'), 'a is gone')
-    }, 2000)
+    // Выяснение, вызывается ли функция как конструктор
+    function Test() {
+      return this instanceof arguments.callee
+    }
 
-    setTimeout(() => {
-      HTMLElement.prototype.remove = function () {
-        if (this.parentNode)
-          this.parentNode.removeChild(this)
+    assert(!Test(), 'We did\'nt instantiate Test, so it returns false')
+    assert(new Test(), 'We did instantiate Test, returning true')
+
+    // Устранение ошибки вместо пользователя, выэывающего функцию
+    function User(firstname, lastname) {
+      if (!(this instanceof arguments.callee)) {
+        return new User(firstname, lastname)
       }
-      document.getElementById('b').remove() // удалить новым методом
-      assert(!document.getElementById('b'), 'b is gone')
-    }, 2000)
+      this.name = `${firstname} ${lastname}`
+    }
 
+    const user3 = User('Ichigo', 'Kurosaki')
+
+    assert(name === 'Rukia', 'Global "name" is still Rukia')
+    assert(user3 instanceof User, 'User instantiated')
+    assert(user3.name === 'Ichigo Kurosaki', 'User name correctly assigned')
   })
 
+  test('Расширение прототипа класса Object', () => {
+    Object.prototype.keys = function () {
+      const keys = []
+      for (let p in this) keys.push(p)
+      return keys
+    }
 
+    const obj = {
+      a: 1,
+      b: 2,
+      c: 3
+    }
+    assert(obj.keys().length === 3, `There must be 3 properties but NOT`)
+    assert(obj.keys().length === 4, `There are 4 properties cuz of "keys" we just created (${obj.keys()})`)
+
+    Object.prototype.keys = function () {
+      const keys = []
+      for (let p in this)
+        if (this.hasOwnProperty(p))
+          keys.push(p)
+      return keys
+    }
+
+    assert(obj.keys().length === 3, `There are 3 properties now as expected (${obj.keys()})`)
+  })
+
+  /*
+    test('Наследования с помощью прототипов', () => {
+      function Person() {}
+      Person.prototype.dance = function () {}
+
+      function Ninja() {}
+      Ninja.prototype = new Person()
+
+      const ninja = new Ninja()
+      assert(ninja instanceof Ninja, 'ninja receives functionality from the Ninja prototype')
+      assert(ninja instanceof Person, '... and the Person prototype')
+      assert(ninja instanceof Object, '... and the Object prototype')
+      assert(typeof ninja.dance == 'function', '... and can dance')
+    })
+
+    test('Прототипы НТМL-разметки элементов модели DOM', () => {
+      setTimeout(() => {
+        const a = document.getElementById('a')
+        a.parentNode.removeChild(a) // удалить старым методом
+        assert(!document.getElementById('a'), 'a is gone')
+      }, 2000)
+
+      setTimeout(() => {
+        HTMLElement.prototype.remove = function () {
+          if (this.parentNode)
+            this.parentNode.removeChild(this)
+        }
+        document.getElementById('b').remove() // удалить новым методом
+        assert(!document.getElementById('b'), 'b is gone')
+      }, 2000)
+
+    })
+
+  */
   /*
   test('Анализ экземпляра объекта и его конструктора', () => {
     function Ninja() {}
