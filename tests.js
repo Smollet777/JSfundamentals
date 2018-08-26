@@ -18,6 +18,25 @@
 })();
 
 window.onload = () => {
+
+  test('Анализ экземпляра объекта и его конструктора', () => {
+    function Ninja() {}
+    const ninja = new Ninja()
+
+    assert(typeof ninja === 'object', 'The type of the instance is object')
+    assert(ninja instanceof Ninja, '"instanceof" identifies the constructor')
+    assert(ninja.constructor === Ninja, 'The ninja object was created by the Ninja function')
+  })
+
+  test('Получение нового экземпляра объекта по ссыпке на конструктор', () => {
+    function Ninja() {}
+    const ninja = new Ninja()
+    const ninja2 = new ninja.constructor()
+
+    assert(ninja2 instanceof Ninja, 'its a Ninja')
+    assert(ninja !== ninja2, 'But not the same Ninja')
+  })
+  /*
   test('Прототипы в качестве образцов для объектов', () => {
     function Ninja() {}
     Ninja.prototype.swingSword = function () {
@@ -61,7 +80,7 @@ window.onload = () => {
     }
 
     assert(ninja.swingSword(), 'Method exists, even out of order')
-  })
+  })*/
 
   //test('click on body or div',()=>{})
   /*
