@@ -18,6 +18,89 @@
 })();
 
 window.onload = () => {
+
+  (function () {
+    let initializing = false
+    const superPattern = /xyz/.test(function () {
+      xyz
+    }) ? /\b_super\b/ : /.*/
+
+    Object.subClass = function (properties) {
+      const _super = this.prototype
+
+      initializing = true
+      let proto = new this()
+      initializing = false
+
+      for (let name in properties) {
+
+        proto[name] =
+          typeof properties[name] === 'function' &&
+          typeof _super[name] === 'function' &&
+          superPattern.test(properties[name]) ?
+
+          (function (name, fn) {
+            return function () {
+              let tmp = this._super
+
+              this._super = _super[name]
+
+              let ret = fn.apply(this, arguments)
+              this._super = tmp
+
+              return ret
+            }
+          })(name, properties[name]) :
+
+          properties[name]
+      }
+
+      function Class() {
+        if (!initializing && this.init)
+          this.init.apply(this, arguments)
+      }
+
+      Class.prototype = proto
+      Class.constructor = Class
+      Class.subClass = arguments.callee
+
+      return Class
+    }
+  })()
+
+  test('Наследование в стиле похожем на ООП', () => {
+    const Person = Object.subClass({
+      init: function (isDancing) {
+        this.dancing = isDancing
+      },
+      dance: function () {
+        return this.dancing
+      }
+    })
+
+    const Ninja = Person.subClass({
+      init: function () {
+        this._super(false)
+      },
+      dance: function () {
+        return this._super()
+      },
+      swingSword: function () {
+        return true
+      }
+    })
+
+    const person = new Person(true)
+    assert(person.dance(), 'The person is dancing')
+    const ninja = new Ninja()
+    assert(ninja.swingSword(), 'The ninja is swinging')
+    assert(!ninja.dance(), 'Ninja not dancing')
+
+    assert(person instanceof Person, 'person is a Person')
+    assert(ninja instanceof Ninja &&
+      ninja instanceof Person, 'ninja is a Ninja and a Person')
+  })
+  /*
   test('Препятствия при получении экземпляров объектов', () => {
     // Результат исключения оператора new из вызова функции
     function User(firstname, lastname) {
@@ -83,7 +166,7 @@ window.onload = () => {
 
     assert(obj.keys().length === 3, `There are 3 properties now as expected (${obj.keys()})`)
   })
-
+*/
   /*
     test('Наследования с помощью прототипов', () => {
       function Person() {}
