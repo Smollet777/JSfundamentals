@@ -19,6 +19,40 @@
 
 window.onload = () => {
 
+  test('Наследования с помощью прототипов', () => {
+    function Person() {}
+    Person.prototype.dance = function () {}
+
+    function Ninja() {}
+    Ninja.prototype = new Person()
+
+    const ninja = new Ninja()
+    assert(ninja instanceof Ninja, 'ninja receives functionality from the Ninja prototype')
+    assert(ninja instanceof Person, '... and the Person prototype')
+    assert(ninja instanceof Object, '... and the Object prototype')
+    assert(typeof ninja.dance == 'function', '... and can dance')
+  })
+
+  test('Прототипы НТМL-разметки элементов модели DOM', () => {
+    setTimeout(() => {
+      const a = document.getElementById('a')
+      a.parentNode.removeChild(a) // удалить старым методом
+      assert(!document.getElementById('a'), 'a is gone')
+    }, 2000)
+
+    setTimeout(() => {
+      HTMLElement.prototype.remove = function () {
+        if (this.parentNode)
+          this.parentNode.removeChild(this)
+      }
+      document.getElementById('b').remove() // удалить новым методом
+      assert(!document.getElementById('b'), 'b is gone')
+    }, 2000)
+
+  })
+
+
+  /*
   test('Анализ экземпляра объекта и его конструктора', () => {
     function Ninja() {}
     const ninja = new Ninja()
@@ -35,7 +69,7 @@ window.onload = () => {
 
     assert(ninja2 instanceof Ninja, 'its a Ninja')
     assert(ninja !== ninja2, 'But not the same Ninja')
-  })
+  })*/
   /*
   test('Прототипы в качестве образцов для объектов', () => {
     function Ninja() {}
