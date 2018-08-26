@@ -18,8 +18,52 @@
 })();
 
 window.onload = () => {
+  test('Прототипы в качестве образцов для объектов', () => {
+    function Ninja() {}
+    Ninja.prototype.swingSword = function () {
+      return true
+    }
 
-  test('click on body or div', () => {})
+    const ninja1 = Ninja()
+    assert(ninja1 === undefined, 'No instance of Ninja created')
+
+    const ninja2 = new Ninja()
+    assert(ninja2 &&
+      ninja2.swingSword &&
+      ninja2.swingSword(),
+      'Instance exists and method is callable')
+  })
+
+  test('Свойства экземпляра объекта', () => {
+    function Ninja() {
+      this.swung = false
+      this.swingSword = function () {
+        return !this.swung
+      }
+    }
+
+    Ninja.prototype.swingSword = function () {
+      return this.swung
+    }
+
+    const ninja = new Ninja()
+    assert(ninja.swingSword(), 'Called the instance method,not the prototype method')
+  })
+
+  test('Увязывание ссылок', () => {
+    function Ninja() {
+      this.swung = true
+    }
+    const ninja = new Ninja()
+
+    Ninja.prototype.swingSword = function () {
+      return this.swung
+    }
+
+    assert(ninja.swingSword(), 'Method exists, even out of order')
+  })
+
+  //test('click on body or div',()=>{})
   /*
     test('Временная область действия и частные переменные', () => {
       // простой counter. numClicks сохраняется для eventListener'а в замыкании
@@ -28,27 +72,28 @@ window.onload = () => {
         return () => alert(++numClicks)
       })(), false);
     })*/
+  /*
+    test('Соблюдение имен в области действия через параметры', function () {});
 
-  test('Соблюдение имен в области действия через параметры', function () {});
-
-  document.addEventListener('click', ((start, end) => { // назначение аргументов в IIFE
-      let numClicks = 0;
-      return () => alert(`${start}${++numClicks}${end}`)
-    })('You cliked ', ' times'), // передача аргументов и IIFE
-    false);
+    document.addEventListener('click', ((start, end) => { // назначение аргументов в IIFE
+        let numClicks = 0;
+        return () => alert(`${start}${++numClicks}${end}`)
+      })('You cliked ', ' times'), // передача аргументов и IIFE
+      false);
 
 
-  // в замыканиях сохраняют­ся только ССЫЛКИ на включаемые в них переменные, а не их конкретные значения в тот момент, когда они создаются
-  // используем IIFE 
-  let divs = document.getElementsByTagName('div');
-  for (var i = 0; i < divs.length; i++)(function (n) {
+    // в замыканиях сохраняют­ся только ССЫЛКИ на включаемые в них переменные, а не их конкретные значения в тот момент, когда они создаются
+    // используем IIFE 
+    let divs = document.getElementsByTagName('div');
+    // заметь var
+    for (var i = 0; i < divs.length; i++)(function (n) {
 
-    // передаём порядковый номер функции немедленного вызова, тем самым, включаем его в замыкание внутренней функции. 
-    divs[n].addEventListener('click', function () {
-      alert(`div ${n+1} was clicked.`);
-    }, false);
-  })(i); // В пределах области действия на каждом шаге цикла переменная i определяется заново
-
+      // передаём порядковый номер функции немедленного вызова, тем самым, включаем его в замыкание внутренней функции. 
+      divs[n].addEventListener('click', function () {
+        alert(`div ${n+1} was clicked.`);
+      }, false);
+    })(i); // В пределах области действия на каждом шаге цикла переменная i определяется заново
+  */
   /* 
   // пример сокращения кода 
   // без ввода переменной с именем покороче(из библиотеки Prototype)
